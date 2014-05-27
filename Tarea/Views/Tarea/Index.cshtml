@@ -1,0 +1,52 @@
+﻿@{
+    Layout = "~/Views/Tarea/_Layout.cshtml";
+}
+
+
+<div id='alert' data-bind='visible: mensaje(), css: { error: isError }' style='display: none'>
+    <span data-bind='text: mensaje()'></span><a href='#' data-bind='    click: cerrar'>X</a>
+</div>
+<h1>Lista de Tareas</h1>
+<div class='loader' data-bind="css: { loading: isLoading() }">Cargando</div>
+<table>
+    <tr>
+        <th>&nbsp;</th>
+        <th>Id</th>
+        <th>Nombre</th>
+        <th>Descripcion</th>
+        <th>Status</th>
+    </tr>
+    <!-- ko foreach: tareas -->
+    <tr>
+        <td><a href="#" data-bind="click: $parent.borrar">x</a>
+
+        </td>
+        <td data-bind="text: id()"></td>
+        <td data-bind="text: nombre()"></td>
+        <td data-bind="text: desc()"></td>
+        <td data-bind="text: status()"></td>
+
+    </tr>
+    <!-- /ko -->
+</table>
+
+<div>
+    <fieldset>
+        <legend>Nuevo</legend>
+        <div>
+            <label>Nombre</label>
+            <input data-bind="value: tarea().nombre" name="Tarea.Nombre">
+        </div>
+        <div>
+            <label>Desc</label>
+            <input data-bind="value: tarea().desc" name="Tarea.Desc">
+        </div>
+        <div>
+            <label>Status</label>
+            <input data-bind="value: tarea().status" name="Tarea.Status">
+        </div>
+
+        <button data-bind='click: agregar'>Agregar</button>
+      
+    </fieldset>
+</div>
