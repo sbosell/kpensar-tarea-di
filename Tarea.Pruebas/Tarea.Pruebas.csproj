@@ -45,7 +45,17 @@
       <Private>True</Private>
       <HintPath>..\Tarea\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
     </Reference>
+    <Reference Include="Moq">
+      <HintPath>..\Tarea\packages\Moq.4.2.1402.2112\lib\net40\Moq.dll</HintPath>
+    </Reference>
+    <Reference Include="NPoco">
+      <HintPath>..\Tarea\packages\NPoco.2.4.67\lib\net40\NPoco.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Data.Linq" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Web.Helpers, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Tarea\packages\Microsoft.AspNet.WebPages.3.1.0\lib\net45\System.Web.Helpers.dll</HintPath>
@@ -84,11 +94,31 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="UnitTest1.cs" />
+    <Compile Include="Setup\TestBase.cs" />
+    <Compile Include="tareaUnitTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Data\Tarea.Datos.csproj">
+      <Project>{0cca4720-c8b7-42d2-94f3-e7e93c31b628}</Project>
+      <Name>Tarea.Datos</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Tarea.Modelos\Tarea.Modelos.csproj">
+      <Project>{599903fa-b387-48fb-a1d4-fe08f50f8e26}</Project>
+      <Name>Tarea.Modelos</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Tarea.Negocio\Tarea.Negocio.csproj">
+      <Project>{c6c40da5-3292-4ff0-a49f-82b70990f902}</Project>
+      <Name>Tarea.Negocio</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Tarea\Tarea.Web.csproj">
+      <Project>{4d17feea-8864-4fe1-95d0-0155ab230aa1}</Project>
+      <Name>Tarea.Web</Name>
+    </ProjectReference>
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

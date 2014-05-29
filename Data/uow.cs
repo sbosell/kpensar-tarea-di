@@ -10,17 +10,24 @@ namespace Tarea.Datos
     public interface IUnitOfWork : IDisposable {
         void Commit();
         IDatabase bD { get; }
+        void NewTransaction();
     }
 
     public class Uow : IUnitOfWork, IDisposable
     {
-        private readonly ITransaction _nTransaction;
+        private  ITransaction _nTransaction;
         public readonly IDatabase _bd;
         private bool disposed = false;
 
         public Uow(IDatabase db)
         {
             _bd = db;
+            NewTransaction();
+        }
+
+        public void NewTransaction()
+        {
+            
             _nTransaction = _bd.GetTransaction();
         }
 
