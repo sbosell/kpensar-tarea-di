@@ -1,0 +1,154 @@
+﻿WebApi, Angular, Ionic framework se enamoraron de móviles
+====================
+
+<!-- copy and paste. Modify height and width if desired. --><iframe class="tscplayer_inline embeddedObject" name="tsc_player" scrolling="no" frameborder="0" type="text/html" style="overflow:hidden;" src="http://www.screencast.com/users/sambos/folders/Snagit/media/4c3337a8-9334-47b4-90c5-e80063980274/embed" height="764" width="444" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
+
+Este post es la primera parte de una serie de como crear una aplicación móvil híbrida.
+
+Los voy a presentar algunas estrategias de como producir una aplicación móvil con nuestro proyecto de Tareas.  
+Va a consistir de algunas herramientas para facilitarlo:  WebApi, Angular y el framework de Ionic.  Vamos a usar 
+el proyecto de Tareas como base para lanzar esta app móvil.  Los invito leer la info sobre la app base:
+
+- [Inyección de dependencias y .NET MVC.](http://kpensar.com/blog/2014/05/27/inyecci%C3%B3n-de-dependencias-y-net-mvc/)
+- [Inyección de dependencias y .NET MVC con Pruebas unitarias](http://kpensar.com/blog/2014/05/29/inyecci%C3%B3n-de-dependencias-y-net-mvc-con-pruebas-unitarias/)
+
+
+Entonces qué vamos a hacer?  Primero, vamos a hablar un poquito sobre Web Api porque es la capa de comunicación entre una app móvil (desconectada) y 
+un bd/sistema.   Me imagino que ya saben de servicios web y tal vez de la historia de ASP.NET y como producir un servicio web.  
+Los frameworks que existía en .NET antes como los de generan SOAP son bien difíciles implementar en el lado de cliente.  
+De hecho, has tratado de construir o consumir un web-servicio de soap sin .NET? 
+ Es bien trabajoso y demasiado complicado y por eso y la popularidad de servicios "REST" ahora, .NET lanzó Web Api.  
+
+##Entonces qué es web api?
+
+> ASP.NET Web API es un framework para crear servicios HTTP para cualquier cliente incluyendo browsers y aplicativos móviles.  ASP.NET Web API es una plataforma ideal para crear aplicaciones "REST" en el framework .NET.  - [MSDN](http://msdn.microsoft.com/en-us/library/hh833994\(v=vs.108\).aspx)
+
+Te acuerdas que en nuestra app de Tareas que hicimos métodos de `JsonResult` para comunicarse con nuestra app?  Viven en el controller `TareaController`.   Vamos a cambiar esos para Web Api y vamos a vincularlos con nuestra app nueva de móvil.  Cuando terminemos con el proyecto vamos a tener nuestra app original más una app para móviles.  
+
+La parte móvil va a consistir de una "SPA - Single Page Application",  que es una aplicación móvil de ajax.  Para nuestro proyecto va a ser html puro pero con el [framework de ionic](http://ionicframework.com/).  Se puede lanzar con phonegap para una experiencia "híbrida/nativa".  
+
+##Donde empezamos?
+
+Primero, quiero integrar la "Stater App" de ionic con Tabs.  Se puede encontrar [aquí](https://github.com/driftyco/ionic-starter-tabs).  De hecho, puedes bajarlo y lanzarlo para ver que hace.  
+
+![Ionic Tabs](http://content.screencast.com/users/sambos/folders/Snagit/media/e5cc4a55-44f3-429c-87fc-3a7d623989ef/06.06.2014-14.12.png)
+
+Nosotros queremos integrar las tareas con esta app ionic.  Entonces, voy a crear otro proyecto solamente para móvil.  Podemos crearlo dentro de nuestra
+Tarea Web pero tal vez en el futuro vayamos a integrarlo con un app android/iphone/etc, seria mejor separarlo.
+
+<!-- copy and paste. Modify height and width if desired. --> <a href="http://content.screencast.com/users/sambos/folders/Snagit/media/af1630d9-a217-4c1f-abd3-5cf9b6c1728b/06.10.2014-08.49.png"><img class="embeddedObject" src="http://content.screencast.com/users/sambos/folders/Snagit/media/af1630d9-a217-4c1f-abd3-5cf9b6c1728b/06.10.2014-08.49.png" width="212" height="549" border="0" /></a>
+
+Ya tenemos nuestra ionic starter app en un proyecto pero no esta vinculado con nada de tareas.   Puedes correrlo para ver los "friends" (nombre de su app).  Para aclarar, ahora tengo 2 proyectos web. 
+
+1.  Tarea - Tiene nuestra página web original.
+2.  Tarea.MobileApp - Lo que acabamos de hacer lo que es un clon del starter de Ionic.  
+
+`Tarea.MobileApp` nos va a servir como una app a parte que podemos lanzar en un android, iphone, etc o podria ser una app html.  Será bastante básico y cumplirá con los requisitos de listar, detalle, agregar y eliminar una tarea.
+
+Vamos a dejar el front end ahora para ver la parte de servidor porque sin los métodos web api, nuestra app no podrá hacer mucho.  Volveremos a esta parte en el siguiente post.  Por ahora, acuerdate que tenemos que tener una capa para que algo desconectado pueda comunicarse con nuestro sistema.
+
+## Web Api
+
+Para que Web Api sea disponible el en proyecto vamos a agregar el nuget [`Microsoft.Web.Api`](https://www.nuget.org/packages/Microsoft.AspNet.WebApi) también necesitaremos [Microsoft.AspNet.WebApi.Cors](https://www.nuget.org/packages/Microsoft.AspNet.WebApi.Cors/5.2.0-rc).  En un rato voy a explicar un poquito sobre CORS.
+
+Después de agregar `WebApi` podemos crear nuestro controller para enviar los datos.   Podemos usar los `JsonResult` métodos del TareaController pero para mi es importante separar el API de la parte del sitio que retorna HTML (vistas).  Por eso, vamos a mover los JSONRESULT métodos al web api.
+
+Los controllers de MVC son optimizado para crear un documento de HTML por `Views`, `PartialViews`, y `HTML Helpers`.  Ese proceso no tiene mucho sentido cuando hablemos de un api que solamente va a volver entities, dto's, modelos, etc.  
+
+En nuestro caso vamos a devolver`HttpResponseMessage` que es un wrapper del dato de lo que vamos a devolver también nos permite devolver otro códigos como `400` o `500` si queremos.   De hecho con web api, se puede enviar los datos directamente sin HttpResponseMessage pero como mencioné, si queremos enviar otro código como 401, es necesario que utilicemos esa clase para devolver los datos.  Si deseas, cambia cada HttpResponseMessage para un tipo como `Tarea` o `List<Tarea>` y funciona igual.
+
+Vamos a ver el controller web api:
+
+    public class TareaDataController : ApiController
+    {
+        public readonly ITareaServicio _tareaServicio;
+
+        public TareaDataController(ITareaServicio tareaServicio)
+        {
+            _tareaServicio = tareaServicio;
+        }
+
+
+        [HttpGet]
+        public HttpResponseMessage Listar()
+        {
+            var tareas = _tareaServicio.Listar();
+
+            return Request.CreateResponse(tareas);
+
+        }
+
+        [HttpGet]
+        public HttpResponseMessage Obtener(int id)
+        {
+            var tarea = _tareaServicio.Obtener(id);
+            return Request.CreateResponse(tarea);
+        }
+
+        [HttpPost]
+        public HttpResponseMessage Guardar(Tarea.Modelos.Tarea Tarea)
+        {
+            if (ModelState.IsValid)
+            {
+                _tareaServicio.Agregar(Tarea);
+                return Request.CreateResponse(Tarea);
+            }
+            else
+            {
+                return Request.CreateResponse(HttpStatusCode.BadRequest, ModelState);
+            }
+            
+        }
+        [HttpPost]
+        public HttpResponseMessage Eliminar(Tarea.Modelos.Tarea Tarea)
+        {
+            _tareaServicio.Eliminar(Tarea);
+            return Request.CreateResponse(200);
+        }
+    }
+
+Si notas, esta capa es muy sencilla.  Con nuestro inyección de dependencia del `ITareaServicio` es muy fácil crear una capa de api para ajax o movil.  Antes de que lancemos vamos a crear una ruta para que corra nuestro api:
+
+     configuration.Routes.MapHttpRoute("API Default", "api/{controller}/{action}/{id}",
+            new { id = RouteParameter.Optional });
+
+Vamos a poner un prefijo de api` en la ruta para separarlo de la aplicación web.  Ahora, con PostMan (una extensión de chrome), probaremos el api:
+
+<!-- copy and paste. Modify height and width if desired. --> <a href="http://content.screencast.com/users/sambos/folders/Snagit/media/be70c0a1-64f2-4a9c-99f6-c6bff33276b3/06.08.2014-12.53.png"><img class="embeddedObject" src="http://content.screencast.com/users/sambos/folders/Snagit/media/be70c0a1-64f2-4a9c-99f6-c6bff33276b3/06.08.2014-12.53.png" width="695" height="526" border="0" /></a>
+
+Perfecto, el webapi devuelve datos y ahora podemos seguir con la parte front end.  Pero espera, vamos a chocarnos con un problema
+si tratamos de llamar este web api de una aplicación web externa (por lo menos con un browser) vamos a tener problemas con CORS:
+
+>  Cross-origin resource sharing (CORS) es un mecanismo que permite recursos (e.g. fonts, JavaScript, etc.) de una página web ser pedidos por otro dominio fuera del dominio esta los recursos.
+
+Todo eso significa que para un browser recibir algo (imagen, json, xml, html), la página que hace el pedido debería estar en el mismo dominio.  No esta claro?  Lanza tu proyecto ahora vas a notar
+que tienes dos proyectos web con dominios diferentes:
+
+* http://localhost:52643/ - proyecto web original
+* http://localhost:54110/  - proyecto movil
+
+Entonces para el cliente de proyecto móvil (browser) recibir datos del proyecto web (web api), tenemos que configurarlo aceptar el pedido con CORS.  
+
+Bueno, es fácil implementar aunque vas a querer especificar un dominio en lugar de "*" en la configuración de web api:
+
+    class WebApiConfig
+    {
+        public static void Register(HttpConfiguration configuration)
+        {
+            var cors = new EnableCorsAttribute("*", "*", "*");  // habilitar CORS en todos dominios, no es un buen idea hacer * pero podemos cambiarlo mas tarde despues de probar
+            configuration.EnableCors(cors);
+        
+            configuration.Routes.MapHttpRoute("API Default", "api/{controller}/{action}/{id}",
+                new { id = RouteParameter.Optional });
+        }
+    }
+
+Ahora podemos llamar y comunicar entre los dos proyectos.  También, podemos apuntar el browser al http://localhost:52643/api/tareadata/listar y vas a ver una lista de datos json.
+
+## Web Api completo.  Te toca front end.
+
+Voy a concluir este post con que tenemos una capa lista para un front end.  La capa que hicimos es super sencilla y vuelva los datos del bd.  Fue súper sencillo porque solamente tuvimos que agregar un controller web api, definir la ruta, y con DI todo trabaja juntos.    El siguiente post vamos a implementar 
+el framework Ionic lo que consiste de una aplicación web con angular, html, javascript y se ve como una app nativo.  El video al principio es la meta final de este series.
+
+
+

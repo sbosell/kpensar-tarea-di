@@ -1,0 +1,136 @@
+﻿## Ionicamos la App
+
+El framework ionic tiene base de Angular y si no conoces mucho de Angular, te invito leer su [documentación](https://angularjs.org/).  Primero vamos a necesitar algunos servicios para comunicarse con nuestra web api.  
+Angular tiene una libreria de ajax que utilice promises y tambien tienen otro de resources.  No me gusta mucho lo de resource y por eso mi libreria se ve asi, con una funcion para cada endpoint:
+
+    var url = 'http://localhost:52643';
+
+    angular.module('starter.services', ['ngStorage'])
+    .factory('tareaService', function ($http, $q, $localStorage)
+    {
+        var srv = {
+            getTareas: function (obj)
+            {
+                var useCache = obj && obj.useCache && $localStorage.hasOwnProperty('listar') ? true : false;
+
+                var d = $q.defer();
+
+                if (useCache)
+                {
+                    d.resolve($localStorage['listar']);
+                } else
+                {
+
+                    $http.get(url + '/api/tareadata/listar').success(function (data)
+                    {
+                        $localStorage['listar'] = data;
+                        d.resolve(data);
+                    }).error(function (data, error)
+                    {
+                        console.log(error);
+                        d.reject();
+                    });
+
+                }
+
+                return d.promise;
+            },
+            obtener: function (id)
+            {
+                var d = $q.defer();
+                $http.get(url + '/api/tareadata/obtener/' + id).success(function (data)
+                {
+                    d.resolve(data);
+
+                }).error(function (data, error)
+                {
+                    d.reject();
+                });
+                return d.promise;
+            },
+            guardar: function (tarea)
+            {
+                var d = $q.defer();
+
+                $http({
+                    url: url + '/api/tareadata/guardar',
+                    method: 'POST',
+                    data: tarea
+
+                }).success(function (data)
+                {
+                    d.resolve(data);
+
+                });
+
+                return d.promise;
+            },
+            eliminar: function (tarea)
+            {
+                var d = $q.defer();
+
+                $http({
+                    url: url + '/api/tareadata/eliminar',
+                    method: 'POST',
+                    data: tarea
+
+                }).success(function (data)
+                {
+                    d.resolve(data);
+
+                });
+                return d.promise;
+            }
+        };
+
+        return srv;
+    });
+
+El patron es muy parecido en cada endpoint.  Llamaos el web api y si es existoso vamos a `resolver` el promise y si no, rechazarlo.  Ese patron es repitido por cada servicio.
+
+      $http.get(url + '/api/tareadata/listar').success(function (data)
+                {
+                    d.resolve(data);
+                }).error(function (data, error)
+                {
+                    d.reject();
+                });
+
+El modulo se llama `service.starter` y cuando lanzamos la app, vamos a inyectarlo:
+
+    angular.module('starter', ['ionic', 'ngStorage',  'starter.controllers', 'starter.services'])
+
+Nota que la app tiene otra dependencias (Angular usa inyeccion de dependencias tambien).  Esa linea define la app angular y incluye las dependencias.  
+
+* NgStorage - para cachear
+* starter.controllers - la carne de app y consolida los data para las vistas
+* starter.services - los controllers usan los servicios para comunicarse con el web api.  Es separado para ser testeable y reusable.  
+* ionic - viene del framework ionic y tiene su directives y funcionalidad para correr
+
+Hay bastante documentacion en ionic y angular y se puede leer ese informacion en sus paginas web.  Si tienen una pregunta, haz un comentario aquí y trato de contestarlo.
+
+Entonces, `starter.services` es definido y ahora vamos a ver el controller mas sencillo lo que muestra detalles de una tarea:
+
+    .controller('TareaDetailCtrl', function($scope, $stateParams, tareaService) {
+      tareaService.obtener($stateParams.tareaId).then(function (data)
+      {
+        $scope.tarea = data;
+      });
+    })
+
+Ese controller corre cuando el usuario toca una tarea en la lista.  Llamanos el web api y devuelva los datos.   La vista:
+
+    <ion-view title="{{tarea.Nombre}}">
+      <ion-content has-header="true" padding="true">
+      <div class="card">
+      <div class="item item-divider item-assertive">
+        {{tarea.Status}}
+      </div>
+      <div class="item item-text-wrap">
+       <p>{{tarea.Desc}}
+      </div>
+ 
+    </div>
+      </ion-content>
+    </ion-view>
+

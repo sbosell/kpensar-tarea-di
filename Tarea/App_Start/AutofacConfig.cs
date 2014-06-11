@@ -7,6 +7,7 @@ using System.Web.Mvc;
 using Autofac;
 using Autofac.Integration.Mvc;
 using Autofac.Core;
+using Autofac.Integration.WebApi;
 using System.Web.Http;
 using NPoco;
 
@@ -29,7 +30,7 @@ namespace Tarea.Web
                 .SingleInstance();
             // registar el servicio
 
-            builder.RegisterType<TareaServicio>().
+            builder.RegisterType<TareaServicio2>().
                 As<ITareaServicio>().
                 InstancePerRequest();
 
@@ -38,9 +39,14 @@ namespace Tarea.Web
             
             // registar para los filters (aun no tenemos)
             builder.RegisterFilterProvider();
+
+            builder.RegisterApiControllers(typeof(Tarea.Web.Controllers.TareaDataController).Assembly);
             // completar la config de autofac
             var container = builder.Build();
             DependencyResolver.SetResolver(new AutofacDependencyResolver(container));
+
+            var resolver = new AutofacWebApiDependencyResolver(container);
+            GlobalConfiguration.Configuration.DependencyResolver = resolver;
 
             
         }

@@ -19,6 +19,12 @@ namespace Tarea.Web.Controllers
             _tareaServicio = tareaServicio;
         }
 
+        public ActionResult Stuff()
+        {
+
+            return View();
+        }
+
         public ActionResult Index()
         {
             return View();
@@ -29,6 +35,12 @@ namespace Tarea.Web.Controllers
         {
             var tareas = _tareaServicio.Listar();
             return Json(tareas, JsonRequestBehavior.AllowGet);
+        }
+
+        public JsonResult Obtener(int id)
+        {
+            var tarea = _tareaServicio.Obtener(id);
+            return Json(tarea, JsonRequestBehavior.AllowGet);
         }
 
         [HttpPost]

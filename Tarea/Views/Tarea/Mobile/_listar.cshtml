@@ -1,0 +1,10 @@
+﻿
+<ion-view title="Tareas">
+  <ion-content class="has-header">
+    <ion-list>
+      <ion-item ng-repeat="tarea in tareas track by $index" type="item-text-wrap" href="#/tab/tarea/{{tarea.Id}}">{{tarea.Nombre}} {{tarea.Desc}} is the one
+      </ion-item>
+    </ion-list>
+  </ion-content>
+</ion-view>
+
