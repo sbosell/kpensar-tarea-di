@@ -1,8 +1,14 @@
-﻿<!DOCTYPE html>
+﻿@using System.Web.Optimization;
+@using Forloop.HtmlHelpers
+
+
+<!DOCTYPE html>
 <html>
 
 <head>
    
+    <!-- add lodash as a general utility library.  It doesn't do ajax or anything -->
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/lodash.js/2.4.1/lodash.min.js"></script>
     <script src="http://cdnjs.cloudflare.com/ajax/libs/knockout/3.1.0/knockout-min.js"></script>
     <script src="/content/qwest.js"></script>
     <style>
@@ -34,8 +40,9 @@
 
 <body>
     @RenderBody()
-
+    @Html.RenderScripts(Scripts.Render) 
     <script src="/content/script.js" defer="defer"></script>
+
 </body>
 
 </html>

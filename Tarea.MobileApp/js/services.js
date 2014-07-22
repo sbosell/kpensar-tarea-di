@@ -1,7 +1,8 @@
-var url = 'http://localhost:52643';
+
 
 angular.module('starter.services', ['ngStorage'])
-.factory('tareaService', function ($http, $q, $localStorage)
+.constant('baseUrl', 'http://localhost:52643')
+.factory('tareaService', function ($http, $q, $localStorage, baseUrl)
 {
     var srv = {
         getTareas: function (obj)
@@ -16,7 +17,7 @@ angular.module('starter.services', ['ngStorage'])
             } else
             {
 
-                $http.get(url + '/api/tareadata/listar').success(function (data)
+                $http.get(baseUrl + '/api/tareadata/listar').success(function (data)
                 {
                     $localStorage['listar'] = data;
                     d.resolve(data);
@@ -25,7 +26,6 @@ angular.module('starter.services', ['ngStorage'])
                     console.log(error);
                     d.reject();
                 });
-
             }
 
             return d.promise;
@@ -33,7 +33,7 @@ angular.module('starter.services', ['ngStorage'])
         obtener: function (id)
         {
             var d = $q.defer();
-            $http.get(url + '/api/tareadata/obtener/' + id).success(function (data)
+            $http.get(baseUrl + '/api/tareadata/obtener/' + id).success(function (data)
             {
                 d.resolve(data);
 
@@ -48,7 +48,7 @@ angular.module('starter.services', ['ngStorage'])
             var d = $q.defer();
 
             $http({
-                url: url + '/api/tareadata/guardar',
+                url: baseUrl + '/api/tareadata/guardar',
                 method: 'POST',
                 data: tarea
 
@@ -65,7 +65,7 @@ angular.module('starter.services', ['ngStorage'])
             var d = $q.defer();
 
             $http({
-                url: url + '/api/tareadata/eliminar',
+                url: baseUrl + '/api/tareadata/eliminar',
                 method: 'POST',
                 data: tarea
 

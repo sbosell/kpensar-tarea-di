@@ -136,6 +136,8 @@ var tm = new TareaModel();
 tm.init();
 ko.applyBindings(tm);
 
+console.log(window.pageVars);
+
 
 
 

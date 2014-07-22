@@ -27,6 +27,8 @@ namespace Tarea.Web.Controllers
 
         public ActionResult Index()
         {
+            var tareas = _tareaServicio.Listar();
+            TempData.Add("tareas", tareas);
             return View();
 
         }
