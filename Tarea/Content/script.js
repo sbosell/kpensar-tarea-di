@@ -6,7 +6,7 @@
 
 var services = {
     tareas: function () {
-
+        
         return reqwest({
             url: '/tarea/listar',
             method: 'get',
@@ -85,14 +85,26 @@ function TareaModel() {
 
     self.getTareas = function () {
         self.isLoading(true);
-        services.tareas().then(function (data) {
+        if ('tareas' in pageVar) {
             self.tareas([]);
-            for (var i = 0, l = data.length; i < l; i++) {
-                var row = data[i];
+            for (var i = 0, l = tareas.length; i < l; i++) {
+                var row = tareas[i];
                 self.tareas.push(new Tarea(row.Id, row.Nombre, row.Desc, row.Status))
             }
             self.isLoading(false);
-        });
+
+        } else {
+
+
+            services.tareas().then(function (data) {
+                self.tareas([]);
+                for (var i = 0, l = data.length; i < l; i++) {
+                    var row = data[i];
+                    self.tareas.push(new Tarea(row.Id, row.Nombre, row.Desc, row.Status))
+                }
+                self.isLoading(false);
+            });
+        }
     };
 
     self.borrar = function (tarea) {
